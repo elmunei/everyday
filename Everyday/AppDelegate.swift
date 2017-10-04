@@ -7,6 +7,9 @@
 //
 
 import UIKit
+import Parse
+import FBSDKLoginKit
+import ParseFacebookUtilsV4
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -15,13 +18,44 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
-        // Override point for customization after application launch.
+        // Enable Local Datastore.
+        Parse.enableLocalDatastore()
+        
+        // Initialize Parse.
+        
+        let parseConfig = ParseClientConfiguration {(ParseMutableClientConfiguration)  in
+            
+            
+            //Accessing pikicha via id & keys
+            ParseMutableClientConfiguration.applicationId = "KzIaJ4Ux9hWm8qaVn4qUHHyBU3NSdr5wpLKkmDsL"
+            ParseMutableClientConfiguration.clientKey = "MZDHcgZvTyASBMJt0XqkM0rZ5R7b7VvWueB46hwF"
+            ParseMutableClientConfiguration.server = "https://parseapi.back4app.com/"
+            ParseMutableClientConfiguration.isLocalDatastoreEnabled = true
+            
+            
+        }
+        
+        Parse.initialize(with: parseConfig)
+        
+        
+        // Track statistics on application openings.
+        PFAnalytics.trackAppOpened(launchOptions: launchOptions)
+        
+       login()
+        
+        
+        
+   
+        //Facebook Login
+        
+        FBSDKApplicationDelegate.sharedInstance().application(application, didFinishLaunchingWithOptions: launchOptions)
         return true
     }
 
     func applicationWillResignActive(_ application: UIApplication) {
-        // Sent when the application is about to move from active to inactive state. This can occur for certain types of temporary interruptions (such as an incoming phone call or SMS message) or when the user quits the application and it begins the transition to the background state.
-        // Use this method to pause ongoing tasks, disable timers, and invalidate graphics rendering callbacks. Games should use this method to pause the game.
+        //Facebook Login
+        FBSDKAppEvents.activateApp()
+
     }
 
     func applicationDidEnterBackground(_ application: UIApplication) {
@@ -41,6 +75,28 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // Called when the application is about to terminate. Save data if appropriate. See also applicationDidEnterBackground:.
     }
 
+    func application(_ application: UIApplication, open url: URL, sourceApplication: String?, annotation: Any) -> Bool {
+        return FBSDKApplicationDelegate.sharedInstance().application(application, open: url, sourceApplication: sourceApplication, annotation: annotation)
+        
+    }
+    
+    func login() {
 
+        // remember user's login
+        let username : String? = UserDefaults.standard.string(forKey: "username")
+
+        // if logged in
+        if username != nil {
+
+//            ProgressHUD.dismiss()
+
+            let storyboard : UIStoryboard = UIStoryboard(name: "Main", bundle: nil)
+            let home = storyboard.instantiateViewController(withIdentifier: "MyProfileCVC") as! MyProfileCVC
+            window?.rootViewController = home
+        }
+    
+    }
+    
+    
 }
 
